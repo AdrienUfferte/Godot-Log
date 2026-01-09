@@ -5,6 +5,8 @@ A lightweight logging system for Godot (GDScript) providing:
 - Automatic log file creation in `user://Logs/`
 - Unified console output in Godot's Output panel
 - Automatic cleanup of old log files
+- Automatic log rotation when a file exceeds 5 MB
+- In-memory retention of recent log entries for quick access
 
 ---
 
@@ -54,6 +56,22 @@ With the following naming scheme:
 ```
 Kalulu_Log_YYYY-MM-DD-HH-MM-SS.txt
 ```
+
+When a log file exceeds 5 MB, a new file is created using the same base name and a
+rotation suffix. Examples:
+
+```
+Kalulu_Log_2024-01-31-18-42-10.txt
+Kalulu_Log_2024-01-31-18-42-10_002.txt
+Kalulu_Log_2024-01-31-18-42-10_003.txt
+...etc...
+```
+
+Rotation starts at `_002` and continues upward. If more than 999 rotations occur,
+the suffix continues as `_1000`, `_1001`, etc.
+
+Each log file includes a note about where the next file starts and when it continues
+from a previous file.
 
 ---
 
@@ -145,6 +163,18 @@ This allows precise isolation of specific systems or features.
 
 - `ALERT`: Displays a modal dialog and blocks execution until closed.
 - `PANIC`: Immediately crashes the application. Intended **only** for testing crash handlers.
+
+---
+
+## File Output, Rotation, and Retention Details
+
+Each log line is written to the log file immediately and flushed for safety.
+
+The logger keeps a rolling in-memory buffer of recent entries (about 14k lines).
+When the buffer grows past the limit, the oldest entries are discarded to keep
+memory usage stable.
+
+If the log directory does not exist, it is created automatically on startup.
 
 ---
 
